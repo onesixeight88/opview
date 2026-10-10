@@ -1,0 +1,30 @@
+name: Build opview iOS IPA
+
+on:
+  workflow_dispatch: # Allows manual trigger button in GitHub Actions
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: |
+          flutter pub get
+          cd ios && pod install && cd ..
+
+      - name: Build unsigned IPA
+        run: flutter build ipa --release --no-codesign
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: opview-ios-ipa
+          path: build/ios/ipa/*.ipa
